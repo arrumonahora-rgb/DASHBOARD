@@ -1,0 +1,7 @@
+mstsc /v:hrdserver
+
+mstsc /v:hardserver /u:Admhardserver
+
+mstsc /v:hardserver /shadow:2 /control /noConsentPrompt
+
+mstsc /v:IP_DO_HOST /shadow:ID_DA_SESSAO /control /noConsentPrompt

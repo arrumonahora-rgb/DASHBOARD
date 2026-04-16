@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sentry Network Scanner</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <h1>Sentry<span>v3.1</span></h1>
+        <p>Selecione uma acao:</p>
+        <button class="btn-primary" onclick="runNetworkScan()">
+          Varredura de Rede
+        </button>
+        <div id="status-indicator"></div>
+      </aside>
+
+      <main class="main-content">
+        <section class="card">
+          <h2>Dispositivos Detectados</h2>
+          <p id="subnet-info">Sub-rede: --</p>
+          <div id="loader" class="hidden">Buscando dispositivos ativos...</div>
+
+          <table id="device-table">
+            <thead>
+              <tr>
+                <th>IP</th>
+                <th>MAC Address</th>
+                <th>Acao</th>
+              </tr>
+            </thead>
+            <tbody id="device-list"></tbody>
+          </table>
+        </section>
+
+        <section id="port-card" class="card hidden">
+          <h2>Portas Abertas: <span id="target-ip-display"></span></h2>
+          <div id="port-list" class="port-grid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      async function runNetworkScan() {
+        const list = document.getElementById("device-list");
+        const loader = document.getElementById("loader");
+        const subnetInfo = document.getElementById("subnet-info");
+
+        loader.classList.remove("hidden");
+        list.innerHTML = "";
+
+        try {
+          const res = await fetch("/scan-network", { method: "POST" });
+          const data = await res.json();
+          loader.classList.add("hidden");
+
+          if (data.status === "error") {
+            alert(data.message);
+            return;
+          }
+
+          subnetInfo.innerText = `Sub-rede: ${data.subnet}`;
+          data.devices.forEach((dev) => {
+            const row = `<tr>
+                        <td><strong>${dev.ip}</strong></td>
+                        <td><code>${dev.mac}</code></td>
+                        <td><button class="btn-mini" onclick="runPortScan('${dev.ip}')">Ver Portas</button></td>
+                    </tr>`;
+            list.innerHTML += row;
+          });
+        } catch (e) {
+          alert("Erro ao conectar com o servidor Python.");
+          loader.classList.add("hidden");
+        }
+      }
+
+      async function runPortScan(ip) {
+        const portCard = document.getElementById("port-card");
+        const portList = document.getElementById("port-list");
+        document.getElementById("target-ip-display").innerText = ip;
+
+        portCard.classList.remove("hidden");
+        portList.innerHTML = "Escaneando portas...";
+
+        const res = await fetch("/scan-ports", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ target: ip }),
+        });
+        const data = await res.json();
+
+        if (data.open_ports.length > 0) {
+          portList.innerHTML = data.open_ports
+            .map((p) => `<span class="port-tag">${p}</span>`)
+            .join("");
+        } else {
+          portList.innerHTML = "Nenhuma porta comum aberta encontrada.";
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Conexões RDP Dinâmico</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        /* Área de Formulário */
+        .form-section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-box label {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .input-box input {
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .input-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn-add {
+            background-color: var(--success);
+            color: #0f172a;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            height: 42px;
+            transition: opacity 0.2s;
+        }
+
+        /* ESTILO DOS NOVOS BOTÕES .DAT */
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-main);
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            cursor: pointer;
+            height: 42px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-add:hover { opacity: 0.9; }
+
+        /* Área de Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, border-color 0.2s;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .server-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .server-ip {
+            color: var(--text-muted);
+            font-family: monospace;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .server-user {
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-connect {
+            flex: 2;
+            background-color: var(--accent);
+            color: #0f172a;
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-connect:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-delete {
+            flex: 1;
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-delete:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            border: 2px dashed #334155;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🔲 RDP Connection Hub Custom</h1>
+            <p style="color: var(--text-muted)">Cadastre seus servidores e gerencie backups em arquivos .dat</p>
+        </header>
+
+        <div class="form-section">
+            <h3 style="margin-top: 0; color: var(--accent);">Adicionar Novo Servidor</h3>
+            <div class="form-group">
+                <div class="input-box">
+                    <label for="srvName">Apelido do Servidor</label>
+                    <input type="text" id="srvName" placeholder="Ex: Servidor de Arquivos">
+                </div>
+                <div class="input-box">
+                    <label for="srvIp">IP ou Hostname</label>
+                    <input type="text" id="srvIp" placeholder="Ex: 192.168.1.50">
+                </div>
+                <div class="input-box">
+                    <label for="srvUser">Usuário (Opcional)</label>
+                    <input type="text" id="srvUser" placeholder="Ex: Administrador">
+                </div>
+                <button class="btn-add" onclick="addNewServer()">Salvar Servidor</button>
+                
+                <button class="btn-secondary" onclick="exportToDat()">💾 Exportar .DAT</button>
+                <button class="btn-secondary" onclick="document.getElementById('importInput').click()">📂 Importar .DAT</button>
+                <input type="file" id="importInput" style="display: none;" accept=".dat" onchange="importFromDat(event)">
+            </div>
+        </div>
+
+        <div class="grid" id="serversGrid">
+            </div>
+    </div>
+
+    <script>
+        // Carrega a lista do LocalStorage ou cria uma vazia
+        let servers = JSON.parse(localStorage.getItem('rdpServers')) || [];
+
+        function renderServers() {
+            const grid = document.getElementById('serversGrid');
+            grid.innerHTML = ''; // Limpa a tela
+
+            if (servers.length === 0) {
+                grid.innerHTML = `<div class="empty-state">Nenhum servidor cadastrado ainda. Use o formulário acima para adicionar!</div>`;
+                return;
+            }
+
+            servers.forEach((server, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div>
+                        <div class="card-header">
+                            <span class="server-name">${server.name}</span>
+                        </div>
+                        <div class="server-ip">${server.ip}</div>
+                        <div class="server-user">${server.user ? 'User: ' + server.user : 'Credenciais manuais'}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-connect" onclick="connectRDP('${server.ip}', '${server.user}')">Conectar</button>
+                        <button class="btn-delete" onclick="deleteServer(${index})">Excluir</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addNewServer() {
+            const nameInput = document.getElementById('srvName');
+            const ipInput = document.getElementById('srvIp');
+            const userInput = document.getElementById('srvUser');
+
+            if (!nameInput.value || !ipInput.value) {
+                alert('Por favor, preencha pelo menos o Nome e o IP!');
+                return;
+            }
+
+            servers.push({
+                name: nameInput.value,
+                ip: ipInput.value,
+                user: userInput.value
+            });
+
+            localStorage.setItem('rdpServers', JSON.stringify(servers));
+
+            nameInput.value = '';
+            ipInput.value = '';
+            userInput.value = '';
+
+            renderServers();
+        }
+
+        function deleteServer(index) {
+            if (confirm('Tem certeza que deseja remover este servidor?')) {
+                servers.splice(index, 1);
+                localStorage.setItem('rdpServers', JSON.stringify(servers));
+                renderServers();
+            }
+        }
+
+        function connectRDP(ip, username) {
+            let rdpContent = `full address:s:${ip}\n`;
+            rdpContent += `prompt for credentials:i:1\n`;
+            rdpContent += `screen mode id:i:2\n`; 
+            
+            if (username && username !== 'undefined') {
+                rdpContent += `username:s:${username}\n`;
+            }
+
+            const blob = new Blob([rdpContent], { type: 'application/x-rdp' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `${ip}_conexao.rdp`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        /* =======================================================
+           NOVAS FUNÇÕES PARA EXPORTAR E IMPORTAR ARQUIVOS .DAT
+           ======================================================= */
+        
+        // Gera e baixa o arquivo conexoes.dat
+        function exportToDat() {
+            if (servers.length === 0) {
+                alert('Adicione pelo menos um servidor antes de exportar!');
+                return;
+            }
+            
+            // Converte o array em string
+            const datContent = JSON.stringify(servers, null, 2);
+            
+            const blob = new Blob([datContent], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = 'conexoes.dat';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Lê o arquivo .dat enviado e atualiza o painel
+        function importFromDat(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedServers = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(importedServers)) {
+                        // Mescla com os atuais ou substitui? Vamos substituir para ficar limpo.
+                        if (confirm('Deseja substituir sua lista atual pelas conexões deste arquivo .dat?')) {
+                            servers = importedServers;
+                            localStorage.setItem('rdpServers', JSON.stringify(servers));
+                            renderServers();
+                            alert('Conexões importadas com sucesso!');
+                        }
+                    } else {
+                        alert('Formato de arquivo .dat inválido.');
+                    }
+                } catch (error) {
+                    alert('Erro ao ler o arquivo .dat. Ele pode estar corrompido.');
+                }
+                // Reseta o input para poder carregar o mesmo arquivo de novo se precisar
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // Renderiza tudo ao abrir a página pela primeira vez
+        renderServers();
+    </script>
+</body>
+</html>

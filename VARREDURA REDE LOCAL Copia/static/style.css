@@ -1,0 +1,104 @@
+:root {
+    --bg-dark: #0f172a;
+    --bg-panel: #1e293b;
+    --accent: #38bdf8;
+    --text-main: #f1f5f9;
+    --text-dim: #94a3b8;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+}
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    background: #020617;
+    padding: 2rem;
+    border-right: 1px solid #1e293b;
+}
+
+.sidebar h1 span {
+    font-size: 0.7rem;
+    background: var(--accent);
+    color: #000;
+    padding: 2px 5px;
+    margin-left: 5px;
+    border-radius: 4px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+}
+
+.card {
+    background: var(--bg-panel);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th {
+    text-align: left;
+    color: var(--accent);
+    border-bottom: 1px solid #334155;
+    padding: 10px;
+}
+
+td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #334155;
+}
+
+.btn-mini {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.btn-mini:hover {
+    background: var(--accent);
+    color: #000;
+}
+
+.port-tag {
+    background: #10b981;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    margin-right: 8px;
+    font-size: 0.9rem;
+}
+
+.hidden {
+    display: none;
+}
